@@ -38,7 +38,10 @@ var products = [
   },
 ];
 var filter = [];
-
+var osArray=[];
+var filterArray=[];
+var filterOsVal=0;
+var filterBrandVal=0;
 $(document).ready(function () {
   displayPage(products);
   displayTable();
@@ -49,38 +52,133 @@ $(document).ready(function () {
     searchItemFunction(searchItem, products);
   });
 
-  $("body").on("click", ".delete", function () {
-    console.log("Entered the delete function");
-    var delId = $(this).data("id");
-    delFunction(delId, products);
-    console.log("ID to delete is " + delId);
+  $("body").on("click",".delete",function(){
+    $(this).parent().hide();
   });
 
-  $("body").on("click", "#osDrop", function () {
+  $("body").on("click", "#osDrop", function(){
     console.log("Clicked on Os dropdown");
-    filterOs(products);
+    console.log("filBrandVal value is "+filterBrandVal);
+    var filOs=$("#osDrop").find('option:selected').val();
+    //var filOs=$(this).data("os");
+    if(filOs!="All"){
+      console.log("Os filter value is not all");
+      filterOsVal=filOs;
+      filterProducts(filterOsVal,filterBrandVal,products);
+    }else{
+      displayTable();
+      filterOsVal=0;
+    }
   });
 
-  $("body").on("click", "#brandDrop", function () {
+  $("body").on("click", "#brandDrop", function(){
     console.log("Clicked on Brand dropdown");
-    var test = $("#osDrop").value();
-    console.log(test);
+    console.log("filOs value is "+filterOsVal);
+    //var filBrand= $(this).data("brand");
+    var filBrand=$("#brandDrop").find('option:selected').val();
+    if(filBrand!="All"){
+      console.log("Brand filter value is not all")
+        filterBrandVal=filBrand;
+        filterProducts(filterOsVal,filterBrandVal,products);
+    }else{
+      displayTable();
+      filterBrandVal=0;
+    }
   });
 });
 
+
+
+
+function filterProducts(filterOsVal,filterBrandVal,products){
+var error=0;
+for(i=0;i<products.length;i++){
+  if(filterOsVal==products[i].os && filterBrandVal==0){
+    console.log("Os matched");
+    filterArray.push(products[i]);
+  }
+}
+for(i=0;i<products.length;i++){
+  if(filterBrandVal==products[i].brand && filterOsVal==0){
+    console.log("Brand matched");
+    filterArray.push(products[i]);
+  }
+}
+
+for(i=0;i<products.length;i++){
+  if(filterBrandVal!=0 && filterOsVal!=0){
+    console.log("You have entered the mix filter");
+    if(filterBrandVal==products[i].brand && filterOsVal==products[i].os){
+      console.log("Mix filtered match");
+      filterArray.push(products[i]);
+    }else{
+      console.log("No mix item found");
+      displayError();
+    }
+  }
+}
+console.log("filtered array is "+ filterArray);
+displayFilter(filterArray);
+}
+
+function displayFilter(filterArray){
+  var filterItem = "";
+  filterItem=
+    "<table>\
+    <tr><th>Product ID</th>\
+    <th> Product Name</th>\
+    <th>Brand</th><th>Operating system</th><th>Remove</th>\
+    </tr>";
+  for (i = 0; i < filterArray.length; i++) {
+    filterItem+=
+      "<tr>\
+                    <td>" +
+      filterArray[i].id +
+      "</td>\
+                    <td>" +
+      filterArray[i].name +
+      "</td>\
+                    <td>" +
+      filterArray[i].brand +
+      "</td>\
+                    <td>" +
+      filterArray[i].os +
+      "</td>\
+                    <td  class='delete'>\
+                    <a href='#' data-id=" +
+      filterArray[i].id +
+      ">Delete</a>\
+                    </td>\
+                </tr>";
+  }
+  filterItem+= "</table>";
+  $("#content").html(filterItem);
+  style();
+  filterArray.splice(0, filterArray.length);
+  console.log(filterArray)
+}
+
+
 function searchItemFunction(searchItem, products) {
   console.log(products);
-  for (i = 0; i < products.length; i++) {
+  if (searchItem.length===0){
+    displayTable();
+  }else for (i = 0; i < products.length; i++) {
     if (searchItem == products[i].id || searchItem === products[i].name){
       console.log("Item found");
       filter.push(products[i]);
       console.log(filter);
       displaySearch(filter);
       break;
-    }else{
-        console.log("Item not found");
+  }else{
+        displayError();
+        console.log("404 Item not found");
     }
   }
+}
+
+function displayError(){
+$("#content").html("Error 404");
 }
 
 function displaySearch(filter) {
@@ -108,8 +206,8 @@ function displaySearch(filter) {
                     <td>" +
       filter[i].os +
       "</td>\
-                    <td>\
-                    <a href='#' class='delete' data-id=" +
+                    <td class='delete'>\
+                    <a href='#'  data-id=" +
       filter[i].id +
       ">Delete</a>\
                     </td>\
@@ -118,33 +216,26 @@ function displaySearch(filter) {
   search += "</table>";
   console.log(search);
   $("#content").html(search);
-  $("#content").show();
+  style();
   filter.splice(0, filter.length);
 }
 
-//display filter
-
-function filterOs(products) {
-  console.log(products.brand);
-}
 
 function displayPage(products) {
-  var osDrop =
-    "<select id='osDrop'>\
-            <option id='osAll' value='All'>All</option>\
-            <option id='iOS' value='iOS'>iOS</option>\
-            <option id='android' value='Android'>Android</option>\
-            <option id='windows' value='Windows'>Windows</option>\
+  var osDrop ="<select id='osDrop'>\
+                  <option class='osDropList' value='All'>All</option>\
+                  <option class='osDropList' data-os ='i'>iOS</option>\
+                  <option class='osDropList' data-os ='i'>Android</option>\
+                  <option class='osDropList' data-os ='i'>Windows</option>\
             </select>";
-  var brandDrop =
-    "<select id='brandDrop'>\
-                <option id=brandAll value='All'>All</option>\
-                <option data-brand='samsung' value='Samsung'>Samsung</option>\
-                <option data-brand='apple' value='Apple'>Apple</option>\
-                <option data-brand='motorola' value='Motorola'>Motorola</option>\
-                <option data-brand='asus' value='Asus'>Asus</option>\
-                <option data-brand='microsoft' value='Microsoft'>Microsoft</option>\
-            </select>";
+  
+
+  var brandDrop="<select id='brandDrop'>\
+                   <option class='brandDropList' value='All'>All</option>"
+      for(i=0;i<products.length;i++){
+          brandDrop +="<option class ='brandDropList' data-brand="+products[i].brand+">"+products[i].brand+"</option>";
+        }
+    brandDrop+="</select>";
 
   var search = "<input id='search' type='text' placeholder='Search..'>";
   var submit =
@@ -153,27 +244,14 @@ function displayPage(products) {
                 id='submit'\
                 class='input'\
                 value='submit'>";
-
-  filterdrop();
+  
   $("#header").before(osDrop);
   $("#header").before(brandDrop);
   $("#header").before(search);
   $("#header").before(submit);
+  $("table").css("width","100%");
 }
 
-function delFunction(delId, products) {
-  let text = "Do you really want to delete the product!\nPress ok to delete";
-  if (confirm(text) == true) {
-    for (i = 0; i < products.length; i++) {
-      if (products[i].id == delId) {
-        console.log("Value of index is " + i);
-        var index = i;
-      }
-    }
-    products.splice(index, 1);
-    displayTable(products);
-  }
-}
 
 function displayTable() {
   var html = " ";
@@ -192,10 +270,10 @@ function displayTable() {
       products[i].brand +
       "</td>\
                     <td>" +
-      products[i].brand +
+      products[i].os +
       "</td>\
-                    <td>\
-                    <a href='#' class='delete' data-id=" +
+                    <td  class='delete'>\
+                    <a href='#' data-id=" +
       products[i].id +
       ">Delete</a>\
                     </td>\
@@ -203,24 +281,57 @@ function displayTable() {
   }
   html += "</table>";
   $("#content").html(html);
-  $("#content").css("width", "100%");
+  style();
+ 
+ 
 }
 
-function filterdrop() {
-  $("#osDrop").css({
-    "background-color": "#4CAF50",
-    "color": "white",
-    "padding": "16px",
+function style(){
+  $("table").css("width", "100%");
+  $("tr").css("background-color", "cyan");
+  $("td").css({"text-align":"centre",
+  "background-color": "aliceblue",
+  "align-content":"centre"});
+
+  $(".osDropList").css("background-color","aliceblue");
+  $(".brandDropList").css("background-color","aliceblue");
+
+
+  $("#search").css({
     "font-size": "16px",
-    "border": "none",
+    "border-color": "black",
     "cursor": "pointer",
+    "float":"right",
   });
-  $("#brandDrop").css({
-    "background-color": "#4CAF50",
-    "color": "white",
-    "padding": "16px",
+ 
+  $("#submit").css({"background-color": "gold",
+  "color": "black",
+  "font-size": "16px",
+  "border-color": "black",
+  "cursor": "pointer",
+  "margin-right":"5px",
+  "margin-left":"5px",
+  "float":"right",
+  });
+
+
+  $("#osDrop").css({
+    "background-color": "cyan",
+    "color": "black",
     "font-size": "16px",
-    "border": "none",
+    "border-color": "black",
     "cursor": "pointer",
+    "margin-left":"20px",
+  });
+
+
+  $("#brandDrop").css({
+    "background-color": "cyan",
+    "color": "black",
+    "font-size": "16px",
+    "border-color": "black",
+    "cursor": "pointer",
+    "margin-right":"20px",
+    "margin-left":"5px",
   });
 }
