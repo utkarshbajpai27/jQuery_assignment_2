@@ -60,29 +60,29 @@ $(document).ready(function () {
     console.log("Clicked on Os dropdown");
     console.log("filBrandVal value is "+filterBrandVal);
     var filOs=$("#osDrop").find('option:selected').val();
-    //var filOs=$(this).data("os");
+    console.log("filOs is "+filOs);
     if(filOs!="All"){
       console.log("Os filter value is not all");
       filterOsVal=filOs;
       filterProducts(filterOsVal,filterBrandVal,products);
     }else{
-      displayTable();
       filterOsVal=0;
+      filterProducts(filterOsVal,filterBrandVal,products);
     }
   });
 
   $("body").on("click", "#brandDrop", function(){
     console.log("Clicked on Brand dropdown");
     console.log("filOs value is "+filterOsVal);
-    //var filBrand= $(this).data("brand");
     var filBrand=$("#brandDrop").find('option:selected').val();
+    console.log("filBrand is "+filBrand);
     if(filBrand!="All"){
       console.log("Brand filter value is not all")
         filterBrandVal=filBrand;
         filterProducts(filterOsVal,filterBrandVal,products);
     }else{
-      displayTable();
       filterBrandVal=0;
+      filterProducts(filterOsVal,filterBrandVal,products);
     }
   });
 });
@@ -92,6 +92,12 @@ $(document).ready(function () {
 
 function filterProducts(filterOsVal,filterBrandVal,products){
 var error=0;
+
+for(i=0;i<products.length;i++){
+  if(filterOsVal==0 && filterBrandVal==0){
+    filterArray.push(products[i]);
+  }
+}
 for(i=0;i<products.length;i++){
   if(filterOsVal==products[i].os && filterBrandVal==0){
     console.log("Os matched");
